@@ -1,0 +1,419 @@
+incident_id
+action.environmental.notes
+action.environmental.variety.Deterioration
+action.environmental.variety.Earthquake
+action.environmental.variety.EMI
+action.environmental.variety.ESD
+action.environmental.variety.Fire
+action.environmental.variety.Flood
+action.environmental.variety.Hazmat
+action.environmental.variety.Humidity
+action.environmental.variety.Hurricane
+action.environmental.variety.Ice
+action.environmental.variety.Landslide
+action.environmental.variety.Leak
+action.environmental.variety.Lightning
+action.environmental.variety.Meteorite
+action.environmental.variety.Other
+action.environmental.variety.Particulates
+action.environmental.variety.Pathogen
+action.environmental.variety.Power failure
+action.environmental.variety.Temperature
+action.environmental.variety.Tornado
+action.environmental.variety.Tsunami
+action.environmental.variety.Unknown
+action.environmental.variety.Vermin
+action.environmental.variety.Volcano
+action.environmental.variety.Wind
+action.error.notes
+action.error.variety.Capacity shortage
+action.error.variety.Classification error
+action.error.variety.Data entry error
+action.error.variety.Disposal error
+action.error.variety.Gaffe
+action.error.variety.Loss
+action.error.variety.Maintenance error
+action.error.variety.Malfunction
+action.error.variety.Misconfiguration
+action.error.variety.Misdelivery
+action.error.variety.Misinformation
+action.error.variety.Other
+action.error.variety.Physical accidents
+action.error.variety.Programming error
+action.error.variety.Publishing error
+action.error.variety.Unknown
+action.error.vector.Carelessness
+action.error.vector.Inadequate personnel
+action.error.vector.Inadequate processes
+action.error.vector.Inadequate technology
+action.error.vector.Other
+action.error.vector.Random error
+action.error.vector.Unknown
+action.error.vector.Web application
+action.hacking.cve
+action.hacking.notes
+action.hacking.result.Deploy payload
+action.hacking.result.Elevate
+action.hacking.result.Exfiltrate
+action.hacking.result.Infiltrate
+action.hacking.result.Lateral movement
+action.hacking.result.NA
+action.hacking.result.Other
+action.hacking.result.Persist
+action.hacking.result.Unknown
+action.hacking.variety.Abuse of functionality
+action.hacking.variety.AitM
+action.hacking.variety.Backdoor
+action.hacking.variety.Brute force
+action.hacking.variety.Buffer overflow
+action.hacking.variety.Cache poisoning
+action.hacking.variety.Cryptanalysis
+action.hacking.variety.CSRF
+action.hacking.variety.Disable controls
+action.hacking.variety.DoS
+action.hacking.variety.Evade Defenses
+action.hacking.variety.Exploit misconfig
+action.hacking.variety.Exploit vuln
+action.hacking.variety.Forced browsing
+action.hacking.variety.Format string attack
+action.hacking.variety.Fuzz testing
+action.hacking.variety.Hijack
+action.hacking.variety.HTTP request smuggling
+action.hacking.variety.HTTP request splitting
+action.hacking.variety.HTTP response smuggling
+action.hacking.variety.HTTP response splitting
+action.hacking.variety.Insecure deserialization
+action.hacking.variety.Integer overflows
+action.hacking.variety.LDAP injection
+action.hacking.variety.Mail command injection
+action.hacking.variety.Null byte injection
+action.hacking.variety.Offline cracking
+action.hacking.variety.OS commanding
+action.hacking.variety.Other
+action.hacking.variety.Pass-the-hash
+action.hacking.variety.Path traversal
+action.hacking.variety.Profile host
+action.hacking.variety.Reverse engineering
+action.hacking.variety.RFI
+action.hacking.variety.Routing detour
+action.hacking.variety.Scan network
+action.hacking.variety.Session fixation
+action.hacking.variety.Session prediction
+action.hacking.variety.Session replay
+action.hacking.variety.Soap array abuse
+action.hacking.variety.Special element injection
+action.hacking.variety.SQLi
+action.hacking.variety.SSI injection
+action.hacking.variety.Unknown
+action.hacking.variety.URL redirector abuse
+action.hacking.variety.Use of stolen creds
+action.hacking.variety.User breakout
+action.hacking.variety.Virtual machine escape
+action.hacking.variety.XML attribute blowup
+action.hacking.variety.XML entity expansion
+action.hacking.variety.XML external entities
+action.hacking.variety.XML injection
+action.hacking.variety.XPath injection
+action.hacking.variety.XQuery injection
+action.hacking.variety.XSS
+action.hacking.vector.3rd party desktop
+action.hacking.vector.Backdoor
+action.hacking.vector.Command shell
+action.hacking.vector.Desktop sharing
+action.hacking.vector.Desktop sharing software
+action.hacking.vector.Hypervisor
+action.hacking.vector.Inter-tenant
+action.hacking.vector.Other
+action.hacking.vector.Other network service
+action.hacking.vector.Partner
+action.hacking.vector.Physical access
+action.hacking.vector.Unknown
+action.hacking.vector.VPN
+action.hacking.vector.Web application
+action.malware.cve
+action.malware.name
+action.malware.notes
+action.malware.result.Deploy payload
+action.malware.result.Elevate
+action.malware.result.Exfiltrate
+action.malware.result.Infiltrate
+action.malware.result.Lateral movement
+action.malware.result.NA
+action.malware.result.Other
+action.malware.result.Persist
+action.malware.result.Unknown
+action.malware.variety.Adminware
+action.malware.variety.Adware
+action.malware.variety.AitM
+action.malware.variety.Backdoor
+action.malware.variety.Backdoor or C2
+action.malware.variety.Brute force
+action.malware.variety.C2
+action.malware.variety.Capture app data
+action.malware.variety.Capture stored data
+action.malware.variety.Click fraud
+action.malware.variety.Click fraud and cryptocurrency mining
+action.malware.variety.Client-side attack
+action.malware.variety.Cryptocurrency mining
+action.malware.variety.Destroy data
+action.malware.variety.Disable controls
+action.malware.variety.DoS
+action.malware.variety.Downloader
+action.malware.variety.Evade Defenses
+action.malware.variety.Exploit misconfig
+action.malware.variety.Exploit vuln
+action.malware.variety.Export data
+action.malware.variety.In-memory
+action.malware.variety.Modify data
+action.malware.variety.Other
+action.malware.variety.Packet sniffer
+action.malware.variety.Pass-the-hash
+action.malware.variety.Password dumper
+action.malware.variety.Profile host
+action.malware.variety.RAM scraper
+action.malware.variety.Ransomware
+action.malware.variety.RAT
+action.malware.variety.Rootkit
+action.malware.variety.Scan network
+action.malware.variety.Spam
+action.malware.variety.Spyware/Keylogger
+action.malware.variety.Trojan
+action.malware.variety.Unknown
+action.malware.variety.Worm
+action.malware.vector.C2
+action.malware.vector.Direct install
+action.malware.vector.Download by malware
+action.malware.vector.Email
+action.malware.vector.Email attachment
+action.malware.vector.Email autoexecute
+action.malware.vector.Email link
+action.malware.vector.Email other
+action.malware.vector.Email unknown
+action.malware.vector.Instant messaging
+action.malware.vector.Network propagation
+action.malware.vector.Other
+action.malware.vector.Partner
+action.malware.vector.Remote injection
+action.malware.vector.Removable media
+action.malware.vector.Software update
+action.malware.vector.Unknown
+action.malware.vector.Web application
+action.malware.vector.Web application - download
+action.malware.vector.Web application - drive-by
+action.misuse.notes
+action.misuse.result.Deploy payload
+action.misuse.result.Elevate
+action.misuse.result.Exfiltrate
+action.misuse.result.Infiltrate
+action.misuse.result.Lateral movement
+action.misuse.result.NA
+action.misuse.result.Other
+action.misuse.result.Persist
+action.misuse.result.Unknown
+action.misuse.variety.Data mishandling
+action.misuse.variety.Email misuse
+action.misuse.variety.Evade Defenses
+action.misuse.variety.Illicit content
+action.misuse.variety.Knowledge abuse
+action.misuse.variety.Net misuse
+action.misuse.variety.Other
+action.misuse.variety.Password or Session Sharing
+action.misuse.variety.Possession abuse
+action.misuse.variety.Privilege abuse
+action.misuse.variety.Snap picture
+action.misuse.variety.Unapproved hardware
+action.misuse.variety.Unapproved software
+action.misuse.variety.Unapproved workaround
+action.misuse.variety.Unknown
+action.misuse.vector.LAN access
+action.misuse.vector.Non-corporate
+action.misuse.vector.Other
+action.misuse.vector.Physical access
+action.misuse.vector.Remote access
+action.misuse.vector.Unknown
+action.misuse.vector.Web application
+action.physical.notes
+action.physical.result.Deploy payload
+action.physical.result.Elevate
+action.physical.result.Exfiltrate
+action.physical.result.Infiltrate
+action.physical.result.Lateral movement
+action.physical.result.NA
+action.physical.result.Other
+action.physical.result.Persist
+action.physical.result.Unknown
+action.physical.variety.Assault
+action.physical.variety.Bypassed controls
+action.physical.variety.Connection
+action.physical.variety.Destruction
+action.physical.variety.Disabled controls
+action.physical.variety.Evade Defenses
+action.physical.variety.Other
+action.physical.variety.Skimmer
+action.physical.variety.Snooping
+action.physical.variety.Surveillance
+action.physical.variety.Tampering
+action.physical.variety.Theft
+action.physical.variety.Unknown
+action.physical.variety.Wiretapping
+action.physical.vector.Other
+action.physical.vector.Partner facility
+action.physical.vector.Partner vehicle
+action.physical.vector.Personal residence
+action.physical.vector.Personal vehicle
+action.physical.vector.Public facility
+action.physical.vector.Public vehicle
+action.physical.vector.Unknown
+action.physical.vector.Victim grounds
+action.physical.vector.Victim public area
+action.physical.vector.Victim secure area
+action.physical.vector.Victim work area
+action.social.notes
+action.social.result.Deploy payload
+action.social.result.Elevate
+action.social.result.Exfiltrate
+action.social.result.Infiltrate
+action.social.result.Lateral movement
+action.social.result.NA
+action.social.result.Other
+action.social.result.Persist
+action.social.result.Unknown
+action.social.target.Auditor
+action.social.target.Call center
+action.social.target.Cashier
+action.social.target.Customer
+action.social.target.Developer
+action.social.target.End-user
+action.social.target.End-user or employee
+action.social.target.Executive
+action.social.target.Finance
+action.social.target.Former employee
+action.social.target.Guard
+action.social.target.Helpdesk
+action.social.target.Human resources
+action.social.target.Maintenance
+action.social.target.Manager
+action.social.target.Other
+action.social.target.Other employee
+action.social.target.Partner
+action.social.target.System admin
+action.social.target.Unknown
+action.social.variety.Baiting
+action.social.variety.Bribery
+action.social.variety.Elicitation
+action.social.variety.Evade Defenses
+action.social.variety.Extortion
+action.social.variety.Forgery
+action.social.variety.Influence
+action.social.variety.Other
+action.social.variety.Phishing
+action.social.variety.Pretexting
+action.social.variety.Prompt bombing
+action.social.variety.Propaganda
+action.social.variety.Scam
+action.social.variety.Spam
+action.social.variety.Unknown
+action.social.vector.Documents
+action.social.vector.Email
+action.social.vector.IM
+action.social.vector.In-person
+action.social.vector.Other
+action.social.vector.Partner
+action.social.vector.Phone
+action.social.vector.Removable media
+action.social.vector.SMS
+action.social.vector.Social media
+action.social.vector.Software
+action.social.vector.Unknown
+action.social.vector.Web application
+action.unknown.notes
+action.unknown.result.Deploy payload
+action.unknown.result.Elevate
+action.unknown.result.Exfiltrate
+action.unknown.result.Infiltrate
+action.unknown.result.Lateral movement
+action.unknown.result.NA
+action.unknown.result.Other
+action.unknown.result.Persist
+action.unknown.result.Unknown
+actor.external.motive.Convenience
+actor.external.motive.Espionage
+actor.external.motive.Fear
+actor.external.motive.Financial
+actor.external.motive.Fun
+actor.external.motive.Grudge
+actor.external.motive.Ideology
+actor.external.motive.NA
+actor.external.motive.Other
+actor.external.motive.Secondary
+actor.external.motive.Unknown
+attribute.availability.duration.value
+attribute.availability.notes
+attribute.availability.variety.Acceleration
+attribute.availability.variety.Degradation
+attribute.availability.variety.Destruction
+attribute.availability.variety.Interruption
+attribute.availability.variety.Loss
+attribute.availability.variety.Obscuration
+attribute.availability.variety.Other
+attribute.availability.variety.Unknown
+attribute.confidentiality.data_disclosure.No
+attribute.confidentiality.data_disclosure.Potentially
+attribute.confidentiality.data_disclosure.Unknown
+attribute.confidentiality.data_disclosure.Yes
+attribute.confidentiality.data_total
+attribute.confidentiality.data_victim.Customer
+attribute.confidentiality.data_victim.Employee
+attribute.confidentiality.data_victim.Other
+attribute.confidentiality.data_victim.Partner
+attribute.confidentiality.data_victim.Patient
+attribute.confidentiality.data_victim.Student
+attribute.confidentiality.data_victim.Unknown
+attribute.confidentiality.data_victim.Victim organization
+attribute.confidentiality.notes
+attribute.confidentiality.state.Other
+attribute.confidentiality.state.Printed
+attribute.confidentiality.state.Processed
+attribute.confidentiality.state.Stored
+attribute.confidentiality.state.Stored encrypted
+attribute.confidentiality.state.Stored unencrypted
+attribute.confidentiality.state.Transmitted
+attribute.confidentiality.state.Transmitted encrypted
+attribute.confidentiality.state.Transmitted unencrypted
+attribute.confidentiality.state.Unknown
+discovery_method.external.variety.Actor disclosure
+discovery_method.external.variety.Audit
+discovery_method.external.variety.Customer
+discovery_method.external.variety.Emergency response team
+discovery_method.external.variety.Found documents
+discovery_method.external.variety.Fraud detection
+discovery_method.external.variety.Incident response
+discovery_method.external.variety.Law enforcement
+discovery_method.external.variety.Other
+discovery_method.external.variety.Security researcher
+discovery_method.external.variety.Suspicious traffic
+discovery_method.external.variety.Unknown
+discovery_method.external.variety.Unrelated 3rd party
+discovery_method.internal.variety.Antivirus
+discovery_method.internal.variety.Break in discovered
+discovery_method.internal.variety.Data loss prevention
+discovery_method.internal.variety.Financial audit
+discovery_method.internal.variety.Fraud detection
+discovery_method.internal.variety.Hids
+discovery_method.internal.variety.Incident response
+discovery_method.internal.variety.Infrastructure monitoring
+discovery_method.internal.variety.It review
+discovery_method.internal.variety.Log review
+discovery_method.internal.variety.Nids
+discovery_method.internal.variety.Offboarding
+discovery_method.internal.variety.Other
+discovery_method.internal.variety.Reported by employee
+discovery_method.internal.variety.Security alarm
+discovery_method.internal.variety.Unknown
+discovery_method.partner.variety.Antivirus
+discovery_method.partner.variety.Audit
+discovery_method.partner.variety.Incident response
+discovery_method.partner.variety.Monitoring service
+discovery_method.partner.variety.Other
+discovery_method.partner.variety.Unknown
+discovery_notes
