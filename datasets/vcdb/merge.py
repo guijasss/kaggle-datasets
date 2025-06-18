@@ -1,316 +1,351 @@
-import polars as pl
+import atexit
+import gc
 import glob
 import os
-import psutil
 import sys
-import gc
+from typing import List, Dict, Set, Optional
 
-# Limite de RAM em bytes (2 GB)
-RAM_LIMIT = 2 * 1024 ** 3
+import polars as pl
+import psutil
+
+# Memory limit in bytes (2 GB)
+MEMORY_LIMIT = 2 * 1024 ** 3
+TEMP_FILES: List[str] = []
 
 
-def check_ram_usage():
+def cleanup_temp_files() -> None:
+    """Clean up temporary files on exit"""
+    for temp_file in TEMP_FILES:
+        try:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+                print(f"🗑️  Removed temp file: {temp_file}")
+        except Exception as e:
+            print(f"❌ Failed to remove {temp_file}: {e}")
+
+
+def register_temp_file(filepath: str) -> None:
+    """Register a temporary file for cleanup"""
+    TEMP_FILES.append(filepath)
+
+
+# Register cleanup function
+atexit.register(cleanup_temp_files)
+
+
+def check_memory_usage() -> int:
+    """Check current memory usage and exit if limit exceeded"""
     process = psutil.Process(os.getpid())
-    mem_usage = process.memory_info().rss
-    if mem_usage > RAM_LIMIT:
-        print(f"❌ RAM excedida: {mem_usage / 1024 ** 3:.2f} GB usados.")
-        sys.exit("Encerrando por uso excessivo de memória.")
-    else:
-        print(f"✅ RAM OK: {mem_usage / 1024 ** 3:.2f} GB")
-    return mem_usage
+    memory_usage = process.memory_info().rss
+
+    if memory_usage > MEMORY_LIMIT:
+        print(f"❌ Memory limit exceeded: {memory_usage / 1024 ** 3:.2f} GB used.")
+        cleanup_temp_files()
+        sys.exit("Terminating due to excessive memory usage.")
+
+    print(f"✅ Memory OK: {memory_usage / 1024 ** 3:.2f} GB")
+    return memory_usage
 
 
-def limpar_memoria():
+def clear_memory() -> None:
+    """Force garbage collection"""
     gc.collect()
 
 
-def criar_base_ids_unicos(arquivos, chave_join):
-    """Cria um DataFrame base com todos os IDs únicos de todos os arquivos"""
-
-    print("🔍 Coletando todos os IDs únicos...")
-
-    todos_ids = set()
-
-    for i, arquivo in enumerate(arquivos):
-        nome = os.path.basename(arquivo)
-        print(f"   📄 Lendo IDs de {nome}...")
-
-        # Lê apenas a coluna de ID
-        df_ids = pl.read_parquet(arquivo).select(chave_join)
-        ids_unicos = df_ids[chave_join].unique().to_list()
-
-        print(f"      📊 {len(ids_unicos)} IDs únicos")
-        todos_ids.update(ids_unicos)
-
-        del df_ids
-        limpar_memoria()
-        check_ram_usage()
-
-    print(f"\n🎯 Total de IDs únicos em todos os arquivos: {len(todos_ids)}")
-
-    # Cria DataFrame base com IDs únicos
-    df_base = pl.DataFrame({chave_join: list(todos_ids)})
-
-    return df_base
-
-
-def analisar_sobreposicao_ids(arquivos, chave_join):
-    """Analisa a sobreposição de IDs entre arquivos"""
-
-    print("🔍 ANÁLISE DE SOBREPOSIÇÃO DE IDs")
+def analyze_id_overlap(files: List[str], join_key: str) -> Dict[str, Dict]:
+    """Analyze ID overlap between files"""
+    print("🔍 ID OVERLAP ANALYSIS")
     print("=" * 50)
 
-    # Coleta IDs de cada arquivo
-    ids_por_arquivo = {}
+    ids_by_file = {}
 
-    for arquivo in arquivos:
-        nome = os.path.basename(arquivo)
-        print(f"📄 Analisando {nome}...")
+    for file_path in files:
+        filename = os.path.basename(file_path)
+        print(f"📄 Analyzing {filename}...")
 
-        df = pl.read_parquet(arquivo)
-        ids_unicos = set(df[chave_join].unique().to_list())
+        df = pl.read_csv(file_path)
+        unique_ids = set(df[join_key].unique().to_list())
 
-        ids_por_arquivo[nome] = {
-            'ids': ids_unicos,
-            'count': len(ids_unicos),
+        ids_by_file[filename] = {
+            'ids': unique_ids,
+            'unique_count': len(unique_ids),
             'total_rows': len(df)
         }
 
-        print(f"   📊 IDs únicos: {len(ids_unicos)}")
-        print(f"   📊 Total linhas: {len(df)}")
-        print(f"   📊 IDs duplicados no arquivo: {len(df) - len(ids_unicos)}")
+        duplicates_count = len(df) - len(unique_ids)
+        print(f"   📊 Unique IDs: {len(unique_ids)}")
+        print(f"   📊 Total rows: {len(df)}")
+        print(f"   📊 Duplicates in file: {duplicates_count}")
 
         del df
-        limpar_memoria()
+        clear_memory()
 
-    # Analisa sobreposição
-    print(f"\n🔍 ANÁLISE DE SOBREPOSIÇÃO:")
-    nomes_arquivos = list(ids_por_arquivo.keys())
+    # Analyze overlap between files
+    print(f"\n🔍 OVERLAP ANALYSIS:")
+    filenames = list(ids_by_file.keys())
 
-    for i, nome1 in enumerate(nomes_arquivos):
-        for nome2 in nomes_arquivos[i + 1:]:
-            ids1 = ids_por_arquivo[nome1]['ids']
-            ids2 = ids_por_arquivo[nome2]['ids']
+    for i, file1 in enumerate(filenames):
+        for file2 in filenames[i + 1:]:
+            ids1 = ids_by_file[file1]['ids']
+            ids2 = ids_by_file[file2]['ids']
 
-            intersecao = ids1.intersection(ids2)
-            uniao = ids1.union(ids2)
+            intersection = ids1.intersection(ids2)
+            union = ids1.union(ids2)
 
-            print(f"   🔗 {nome1} ∩ {nome2}:")
-            print(f"      🎯 IDs em comum: {len(intersecao)}")
-            print(f"      📊 Total únicos: {len(uniao)}")
-            print(f"      📈 Sobreposição: {len(intersecao) / len(uniao) * 100:.1f}%")
+            overlap_percent = len(intersection) / len(union) * 100 if union else 0
 
-    return ids_por_arquivo
+            print(f"   🔗 {file1} ∩ {file2}:")
+            print(f"      🎯 Common IDs: {len(intersection)}")
+            print(f"      📊 Total unique: {len(union)}")
+            print(f"      📈 Overlap: {overlap_percent:.1f}%")
+
+    return ids_by_file
 
 
-def join_controlado_com_base(arquivos, chave_join, usar_intersecao=True):
-    """Join controlado usando base de IDs"""
+def get_common_ids(files: List[str], join_key: str) -> Set:
+    """Get IDs that exist in ALL files"""
+    common_ids = None
 
-    print("🎯 JOIN CONTROLADO COM BASE DE IDs")
+    for file_path in files:
+        df = pl.read_csv(file_path)
+        file_ids = set(df[join_key].unique().to_list())
 
-    # Primeira opção: analisa sobreposição
-    print("\n🔍 Analisando sobreposição...")
-    ids_info = analisar_sobreposicao_ids(arquivos, chave_join)
-
-    if usar_intersecao:
-        # Usa apenas IDs que existem em TODOS os arquivos
-        print("\n🎯 Estratégia: INTERSEÇÃO (IDs que existem em TODOS os arquivos)")
-
-        # Encontra IDs comuns a todos
-        ids_comuns = None
-        for nome, info in ids_info.items():
-            if ids_comuns is None:
-                ids_comuns = info['ids'].copy()
-            else:
-                ids_comuns = ids_comuns.intersection(info['ids'])
-
-        print(f"   🎯 IDs comuns a todos: {len(ids_comuns)}")
-
-        if len(ids_comuns) == 0:
-            print("❌ Nenhum ID comum entre todos os arquivos!")
-            return None
-
-        # Cria base com IDs comuns
-        df_base = pl.DataFrame({chave_join: list(ids_comuns)})
-
-    else:
-        # Usa todos os IDs únicos
-        print("\n🎯 Estratégia: UNIÃO (todos os IDs únicos)")
-        df_base = criar_base_ids_unicos(arquivos, chave_join)
-
-    print(f"   📊 Base criada: {df_base.shape}")
-    check_ram_usage()
-
-    # Agora faz join controlado
-    df_resultado = df_base
-
-    for i, arquivo in enumerate(arquivos):
-        nome = os.path.basename(arquivo)
-        print(f"\n🔗 Join {i + 1}/{len(arquivos)}: {nome}")
-
-        # Carrega arquivo
-        df_temp = pl.read_parquet(arquivo)
-        print(f"   📄 Arquivo original: {df_temp.shape}")
-
-        # Remove duplicatas por ID (fica apenas com o primeiro)
-        df_temp_unique = df_temp.unique(subset=[chave_join], keep="first")
-        print(f"   📄 Após remoção de duplicatas: {df_temp_unique.shape}")
-
-        # Identifica colunas novas
-        colunas_novas = [c for c in df_temp_unique.columns if c not in df_resultado.columns]
-
-        if colunas_novas:
-            print(f"   📋 Colunas novas: {colunas_novas}")
-
-            # Seleciona apenas colunas novas + chave
-            colunas_necessarias = [chave_join] + colunas_novas
-            df_temp_select = df_temp_unique.select(colunas_necessarias)
-
-            # LEFT JOIN (mantém todos os IDs da base)
-            df_resultado = df_resultado.join(df_temp_select, on=chave_join, how="left")
-            print(f"   📊 Resultado: {df_resultado.shape}")
-
-            # VERIFICAÇÃO CRÍTICA: Se o número de linhas mudou, ALGO ESTÁ ERRADO!
-            if df_resultado.height != df_base.height:
-                print(f"   ❌ ERRO! Linhas mudaram: {df_base.height} → {df_resultado.height}")
-                print("   🛑 Parando para evitar explosão de memória!")
-                break
-
+        if common_ids is None:
+            common_ids = file_ids
         else:
-            print(f"   ⚠️  Nenhuma coluna nova em {nome}")
+            common_ids = common_ids.intersection(file_ids)
 
-        del df_temp, df_temp_unique
-        if 'df_temp_select' in locals():
-            del df_temp_select
-        limpar_memoria()
-        check_ram_usage()
+        del df
+        clear_memory()
 
-    return df_resultado
+    return common_ids or set()
 
 
-def estrategia_arquivo_principal(arquivos, chave_join, arquivo_principal=None):
-    """Usa um arquivo específico como base"""
+def get_all_unique_ids(files: List[str], join_key: str) -> Set:
+    """Get all unique IDs from all files"""
+    all_ids = set()
 
-    print("🎯 ESTRATÉGIA: ARQUIVO PRINCIPAL COMO BASE")
+    for file_path in files:
+        filename = os.path.basename(file_path)
+        print(f"   📄 Reading IDs from {filename}...")
 
-    # Escolhe arquivo principal
-    if arquivo_principal:
-        arquivo_base = None
-        for arq in arquivos:
-            if arquivo_principal in os.path.basename(arq):
-                arquivo_base = arq
+        df_ids = pl.read_csv(file_path).select(join_key)
+        unique_ids = df_ids[join_key].unique().to_list()
+
+        print(f"      📊 {len(unique_ids)} unique IDs")
+        all_ids.update(unique_ids)
+
+        del df_ids
+        clear_memory()
+        check_memory_usage()
+
+    return all_ids
+
+
+def controlled_join_with_base(files: List[str], join_key: str, use_intersection: bool = True) -> Optional[pl.DataFrame]:
+    """Perform controlled join using ID base"""
+    print("🎯 CONTROLLED JOIN WITH ID BASE")
+
+    # Analyze overlap first
+    print("\n🔍 Analyzing overlap...")
+    ids_info = analyze_id_overlap(files, join_key)
+
+    if use_intersection:
+        print("\n🎯 Strategy: INTERSECTION (IDs existing in ALL files)")
+        common_ids = get_common_ids(files, join_key)
+
+        print(f"   🎯 Common IDs across all files: {len(common_ids)}")
+
+        if len(common_ids) == 0:
+            print("❌ No common IDs between all files!")
+            return None
+
+        base_df = pl.DataFrame({join_key: list(common_ids)})
+    else:
+        print("\n🎯 Strategy: UNION (all unique IDs)")
+        all_ids = get_all_unique_ids(files, join_key)
+        print(f"\n🎯 Total unique IDs across all files: {len(all_ids)}")
+        base_df = pl.DataFrame({join_key: list(all_ids)})
+
+    print(f"   📊 Base created: {base_df.shape}")
+    check_memory_usage()
+
+    result_df = base_df
+
+    for i, file_path in enumerate(files):
+        filename = os.path.basename(file_path)
+        print(f"\n🔗 Join {i + 1}/{len(files)}: {filename}")
+
+        temp_df = pl.read_csv(file_path)
+        print(f"   📄 Original file: {temp_df.shape}")
+
+        # Remove duplicates by ID (keep first occurrence)
+        temp_df_unique = temp_df.unique(subset=[join_key], keep="first")
+        print(f"   📄 After removing duplicates: {temp_df_unique.shape}")
+
+        # Identify new columns
+        new_columns = [col for col in temp_df_unique.columns if col not in result_df.columns]
+
+        if new_columns:
+            print(f"   📋 New columns: {new_columns}")
+
+            # Select only new columns + join key
+            required_columns = [join_key] + new_columns
+            temp_df_select = temp_df_unique.select(required_columns)
+
+            # LEFT JOIN (maintain all IDs from base)
+            result_df = result_df.join(temp_df_select, on=join_key, how="left")
+            print(f"   📊 Result: {result_df.shape}")
+
+            # Critical check: if row count changed, something is wrong
+            if result_df.height != base_df.height:
+                print(f"   ❌ ERROR! Row count changed: {base_df.height} → {result_df.height}")
+                print("   🛑 Stopping to prevent memory explosion!")
                 break
 
-        if not arquivo_base:
-            print(f"❌ Arquivo '{arquivo_principal}' não encontrado!")
+            del temp_df_select
+        else:
+            print(f"   ⚠️  No new columns in {filename}")
+
+        del temp_df, temp_df_unique
+        clear_memory()
+        check_memory_usage()
+
+    return result_df
+
+
+def main_file_strategy(files: List[str], join_key: str, main_file: Optional[str] = None) -> Optional[pl.DataFrame]:
+    """Use a specific file as the main base"""
+    print("🎯 STRATEGY: MAIN FILE AS BASE")
+
+    # Choose main file
+    if main_file:
+        base_file = None
+        for file_path in files:
+            if main_file in os.path.basename(file_path):
+                base_file = file_path
+                break
+
+        if not base_file:
+            print(f"❌ File '{main_file}' not found!")
             return None
     else:
-        # Usa o primeiro arquivo
-        arquivo_base = arquivos[0]
+        base_file = files[0]
 
-    print(f"🟢 Arquivo base: {os.path.basename(arquivo_base)}")
+    print(f"🟢 Base file: {os.path.basename(base_file)}")
 
-    # Carrega arquivo base
-    df_resultado = pl.read_parquet(arquivo_base)
-    print(f"   📊 Base: {df_resultado.shape}")
+    # Load base file
+    result_df = pl.read_csv(base_file)
+    print(f"   📊 Base: {result_df.shape}")
 
-    # Remove duplicatas da base
-    df_resultado = df_resultado.unique(subset=[chave_join], keep="first")
-    print(f"   📊 Base sem duplicatas: {df_resultado.shape}")
-    check_ram_usage()
+    # Remove duplicates from base
+    result_df = result_df.unique(subset=[join_key], keep="first")
+    print(f"   📊 Base without duplicates: {result_df.shape}")
+    check_memory_usage()
 
-    # Join com outros arquivos
-    outros_arquivos = [arq for arq in arquivos if arq != arquivo_base]
+    # Join with other files
+    other_files = [f for f in files if f != base_file]
 
-    for i, arquivo in enumerate(outros_arquivos):
-        nome = os.path.basename(arquivo)
-        print(f"\n🔗 Join {i + 1}/{len(outros_arquivos)}: {nome}")
+    for i, file_path in enumerate(other_files):
+        filename = os.path.basename(file_path)
+        print(f"\n🔗 Join {i + 1}/{len(other_files)}: {filename}")
 
-        df_temp = pl.read_parquet(arquivo)
-        print(f"   📄 Arquivo: {df_temp.shape}")
+        temp_df = pl.read_csv(file_path)
+        print(f"   📄 File: {temp_df.shape}")
 
-        # Remove duplicatas
-        df_temp = df_temp.unique(subset=[chave_join], keep="first")
-        print(f"   📄 Sem duplicatas: {df_temp.shape}")
+        # Remove duplicates
+        temp_df = temp_df.unique(subset=[join_key], keep="first")
+        print(f"   📄 Without duplicates: {temp_df.shape}")
 
-        # Colunas novas
-        colunas_novas = [c for c in df_temp.columns if c not in df_resultado.columns]
+        # New columns
+        new_columns = [col for col in temp_df.columns if col not in result_df.columns]
 
-        if colunas_novas:
-            df_temp = df_temp.select([chave_join] + colunas_novas)
-            print(f"   📋 Selecionadas: {len(colunas_novas)} colunas")
+        if new_columns:
+            temp_df = temp_df.select([join_key] + new_columns)
+            print(f"   📋 Selected: {len(new_columns)} columns")
 
             # LEFT JOIN
-            linhas_antes = df_resultado.height
-            df_resultado = df_resultado.join(df_temp, on=chave_join, how="left")
+            rows_before = result_df.height
+            result_df = result_df.join(temp_df, on=join_key, how="left")
 
-            print(f"   📊 Resultado: {df_resultado.shape}")
+            print(f"   📊 Result: {result_df.shape}")
 
-            # Verificação crítica
-            if df_resultado.height != linhas_antes:
-                print(f"   ❌ ERRO! Linhas mudaram: {linhas_antes} → {df_resultado.height}")
-                print("   🛑 Interrompendo!")
+            # Critical check
+            if result_df.height != rows_before:
+                print(f"   ❌ ERROR! Row count changed: {rows_before} → {result_df.height}")
+                print("   🛑 Interrupting!")
                 break
 
-        del df_temp
-        limpar_memoria()
-        check_ram_usage()
+        del temp_df
+        clear_memory()
+        check_memory_usage()
 
-    return df_resultado
+    return result_df
 
 
-# EXECUÇÃO PRINCIPAL
-if __name__ == "__main__":
-    caminho = "./_tmp"
-    chave_join = "incident_id"
-    arquivos = glob.glob(os.path.join(caminho, "*.parquet"))
+def save_result(df: pl.DataFrame, output_path: str = "./_tmp/result.csv") -> None:
+    """Save the result DataFrame"""
+    df.write_csv(output_path)
+    print(f"💾 Saved: {output_path}")
 
-    if len(arquivos) < 2:
-        raise Exception("É necessário pelo menos dois arquivos Parquet.")
 
-    print(f"📁 Encontrados {len(arquivos)} arquivos")
-    print("🎯 Problema identificado: PRODUTO CARTESIANO nos joins!")
-    print("💡 Soluções disponíveis:\n")
+def print_statistics(df: pl.DataFrame, join_key: str) -> None:
+    """Print DataFrame statistics"""
+    print(f"\n📈 Statistics:")
+    print(f"   🎯 Total rows: {df.height:,}")
+    print(f"   📋 Total columns: {df.width}")
+    print(f"   🔍 Unique IDs: {df[join_key].n_unique()}")
+
+    print(f"\n👀 Preview:")
+    print(df.head())
+
+
+def main() -> None:
+    """Main execution function"""
+    data_path = "./_tmp"
+    join_key = "incident_id"
+    csv_files = glob.glob(os.path.join(data_path, "*.csv"))
+
+    if len(csv_files) < 2:
+        raise Exception("At least two CSV files are required.")
+
+    print(f"📁 Found {len(csv_files)} files")
+    print("🎯 Identified problem: CARTESIAN PRODUCT in joins!")
+    print("💡 Available solutions:\n")
 
     try:
-        # Escolha da estratégia
-        print("🎯 Escolhendo estratégia automaticamente...")
+        # Choose strategy automatically
+        print("🎯 Choosing strategy automatically...")
 
-        if len(arquivos) <= 5:
-            print("📊 Usando: INTERSECÇÃO (IDs comuns a todos)")
-            df_final = join_controlado_com_base(arquivos, chave_join, usar_intersecao=True)
+        if len(csv_files) <= 5:
+            print("📊 Using: INTERSECTION (common IDs across all files)")
+            final_df = controlled_join_with_base(csv_files, join_key, use_intersection=True)
         else:
-            print("📊 Usando: ARQUIVO PRINCIPAL como base")
-            df_final = estrategia_arquivo_principal(arquivos, chave_join)
+            print("📊 Using: MAIN FILE as base")
+            final_df = main_file_strategy(csv_files, join_key)
 
-        if df_final is not None:
-            print(f"\n✅ Join controlado completo!")
-            print(f"📊 Resultado final: {df_final.shape}")
+        if final_df is not None:
+            print(f"\n✅ Controlled join completed!")
+            print(f"📊 Final result: {final_df.shape}")
 
-            # Salva resultado
-            df_final.write_csv("resultado_controlado.csv")
-            print("💾 Salvo: resultado_controlado.parquet")
+            # Save result
+            save_result(final_df)
 
-            # Preview
-            print("\n👀 Preview:")
-            print(df_final.head())
+            # Print statistics
+            print_statistics(final_df, join_key)
 
-            # Estatísticas
-            print(f"\n📈 Estatísticas:")
-            print(f"   🎯 Total de linhas: {df_final.height:,}")
-            print(f"   📋 Total de colunas: {df_final.width}")
-            print(f"   🔍 IDs únicos: {df_final[chave_join].n_unique()}")
-
-            del df_final
-            limpar_memoria()
-            check_ram_usage()
+            del final_df
+            clear_memory()
+            check_memory_usage()
 
     except Exception as e:
-        print(f"❌ Erro: {e}")
-        check_ram_usage()
+        print(f"❌ Error: {e}")
+        check_memory_usage()
 
-    # Limpeza
-    temp_files = glob.glob("checkpoint_*.parquet")
-    for temp_file in temp_files:
-        if os.path.exists(temp_file):
-            os.remove(temp_file)
+    finally:
+        # Cleanup temporary files
+        cleanup_temp_files()
+
+
+if __name__ == "__main__":
+    main()
