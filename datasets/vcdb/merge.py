@@ -300,7 +300,7 @@ def print_statistics(df: pl.DataFrame, join_key: str) -> None:
     print(df.head())
 
 
-def main() -> None:
+def run_merge() -> None:
     """Main execution function"""
     data_path = "./_tmp"
     join_key = "incident_id"
@@ -345,7 +345,3 @@ def main() -> None:
     finally:
         # Cleanup temporary files
         cleanup_temp_files()
-
-
-if __name__ == "__main__":
-    main()
