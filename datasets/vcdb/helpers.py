@@ -19,7 +19,7 @@ def coalesce(df: DataFrame, cols: list[str]) -> Series:
 
 
 def write_dataframe(df: DataFrame, name: str) -> None:
-    df.to_csv(f"./_tmp/{name}.csv")
+    df.to_csv(f"/tmp/{name}.csv")
     
     
 def read_columns_txt(path: str) -> list:
@@ -28,15 +28,15 @@ def read_columns_txt(path: str) -> list:
 
 def get_vcdb(columns: list = None) -> DataFrame:
     return read_csv(
-            "./data/vcdb.csv",
+            "/tmp/data/vcdb.csv",
             low_memory=False,
             header=0,
-            usecols=columns or read_columns_txt(path="./docs/columns.txt")
+            usecols=columns or read_columns_txt(path="/tmp/docs/columns.txt")
             )
 
 
 def filter_columns(include_patterns: list[str], exclude_patterns: list[str] = None):
-    columns = read_columns_txt("./docs/columns.txt")
+    columns = read_columns_txt("/tmp/docs/columns.txt")
 
     def pattern_to_parts(pattern: str):
         return pattern.split(".")

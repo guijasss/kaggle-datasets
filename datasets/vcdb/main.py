@@ -1,9 +1,6 @@
 from datasets.vcdb.dataframes import *
-from datasets.common.fs import rmdir, makedir
 from datasets.vcdb.helpers import write_dataframe
 from datasets.vcdb.merge import run_merge
-
-makedir("_tmp")
 
 print("Processando dataframes... ", end="")
 
@@ -23,5 +20,3 @@ for name, data in dataframes.items():
     write_dataframe(data, name)
 
 run_merge()
-
-#rmdir("_tmp")

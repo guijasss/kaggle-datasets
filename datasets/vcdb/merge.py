@@ -283,7 +283,7 @@ def main_file_strategy(files: List[str], join_key: str, main_file: Optional[str]
     return result_df
 
 
-def save_result(df: pl.DataFrame, output_path: str = "./_tmp/result.csv") -> None:
+def save_result(df: pl.DataFrame, output_path: str = "/tmp/result.csv") -> None:
     """Save the result DataFrame"""
     df.write_csv(output_path)
     print(f"💾 Saved: {output_path}")
@@ -302,7 +302,7 @@ def print_statistics(df: pl.DataFrame, join_key: str) -> None:
 
 def run_merge() -> None:
     """Main execution function"""
-    data_path = "./_tmp"
+    data_path = "/tmp"
     join_key = "incident_id"
     csv_files = glob.glob(os.path.join(data_path, "*.csv"))
 
