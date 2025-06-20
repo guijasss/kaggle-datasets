@@ -1,6 +1,7 @@
 from datasets.vcdb.dataframes import *
 from datasets.vcdb.helpers import write_dataframe
 from datasets.vcdb.merge import run_merge
+from datasets.common.kaggle import send_dataset
 
 print("Processando dataframes... ", end="")
 
@@ -20,3 +21,5 @@ for name, data in dataframes.items():
     write_dataframe(data, name)
 
 run_merge()
+send_dataset()
+

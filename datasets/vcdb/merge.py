@@ -8,6 +8,8 @@ from typing import List, Dict, Set, Optional
 import polars as pl
 import psutil
 
+from datasets.common.fs import makedir
+
 # Memory limit in bytes (2 GB)
 MEMORY_LIMIT = 2 * 1024 ** 3
 TEMP_FILES: List[str] = []
@@ -283,8 +285,9 @@ def main_file_strategy(files: List[str], join_key: str, main_file: Optional[str]
     return result_df
 
 
-def save_result(df: pl.DataFrame, output_path: str = "/tmp/result.csv") -> None:
+def save_result(df: pl.DataFrame, output_path: str = "/tmp/kaggle/result.csv") -> None:
     """Save the result DataFrame"""
+    makedir("/tmp/kaggle")
     df.write_csv(output_path)
     print(f"💾 Saved: {output_path}")
 

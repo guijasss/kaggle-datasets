@@ -1,22 +1,30 @@
 FROM python:3.11-slim
 
+# Diretório de trabalho
 WORKDIR /app
 
-# 1. Copia só o requirements.txt primeiro
+# Copia e instala dependências
 COPY requirements.txt .
+RUN pip install -r requirements.txt \
+ && pip install kaggle  # instala a API do Kaggle
 
-# 2. Instala as dependências antes de copiar o código (usa cache se o arquivo não mudou)
-RUN pip install --no-cache-dir -r requirements.txt
-
-# 3. Agora copia o resto do código (essa camada será refeita com frequência)
+# Copia todo o código da aplicação
 COPY . .
 
-# 4. Define o PYTHONPATH
+RUN mv datasets/vcdb/data /tmp \
+ && mv datasets/vcdb/docs /tmp
+
+# Cria diretório padrão para a credencial do Kaggle
+RUN mkdir -p /root/.config/kaggle
+
+# Copie o kaggle.json da sua máquina no momento do build
+COPY datasets/vcdb/kaggle/kaggle.json /root/.config/kaggle/kaggle.json
+
+# Garante permissões seguras para a chave
+RUN chmod 600 /root/.config/kaggle/kaggle.json
+
+# Define o PYTHONPATH
 ENV PYTHONPATH=/app
 
-# 5. Move diretórios se necessário (como falamos antes)
-RUN mv datasets/vcdb/data /tmp/data \
- && mv datasets/vcdb/docs /tmp/docs
-
-# 6. Comando final
+# Comando padrão
 CMD ["python", "datasets/vcdb/main.py"]
