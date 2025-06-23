@@ -1,16 +1,18 @@
 import requests
 import os
 from datetime import datetime
+from pathlib import Path
 import zipfile
 import io
 
 # Configurações
 SOURCES = [
-    "https://github.com/vz-risk/VCDB/raw/master/data/csv/vcdb.csv.zip"
+    "https://github.com/vz-risk/VCDB/raw/refs/heads/master/data/csv/vcdb.csv.zip"
 ]
 
-OUTPUT_DIR = "../data"
+OUTPUT_DIR = "/tmp/data"
 OUTPUT_CSV = f"{OUTPUT_DIR}/vcdb.csv"
+CSV_INTERNAL_PATH = "data/dbir/VCDB/data/csv/vcdb.csv"  # Caminho exato dentro do zip
 
 
 def download_and_extract():
@@ -26,20 +28,14 @@ def download_and_extract():
             print("Download bem-sucedido! Extraindo conteúdo...")
 
             with zipfile.ZipFile(io.BytesIO(response.content)) as z:
-                # Lista os arquivos dentro do zip
-                file_names = z.namelist()
 
-                # Encontrar o primeiro arquivo CSV dentro do ZIP
-                csv_files = [f for f in file_names if f.lower().endswith(".csv")]
-
-                if not csv_files:
-                    print("Nenhum arquivo CSV encontrado no zip.")
+                if CSV_INTERNAL_PATH not in z.namelist():
+                    print(f"{CSV_INTERNAL_PATH} não encontrado dentro do zip.")
                     return False
 
-                csv_name = csv_files[0]
-                print(f"Extraindo {csv_name}...")
+                print(f"Extraindo {CSV_INTERNAL_PATH}...")
 
-                with z.open(csv_name) as f_in, open(OUTPUT_CSV, 'wb') as f_out:
+                with z.open(CSV_INTERNAL_PATH) as f_in, open(OUTPUT_CSV, 'wb') as f_out:
                     f_out.write(f_in.read())
 
             print(f"Arquivo salvo em {OUTPUT_CSV}")

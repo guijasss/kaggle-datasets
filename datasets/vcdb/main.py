@@ -2,6 +2,9 @@ from datasets.vcdb.dataframes import *
 from datasets.vcdb.helpers import write_dataframe
 from datasets.vcdb.merge import run_merge
 from datasets.common.kaggle import send_dataset
+from datasets.vcdb.scripts.download import download_and_extract
+
+download_and_extract()
 
 print("Processando dataframes... ", end="")
 
@@ -22,4 +25,3 @@ for name, data in dataframes.items():
 
 run_merge()
 send_dataset()
-

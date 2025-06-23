@@ -11,8 +11,8 @@ RUN pip install -r requirements.txt \
 # Copia todo o código da aplicação
 COPY . .
 
-RUN mv datasets/vcdb/data /tmp \
- && mv datasets/vcdb/docs /tmp
+#RUN mv datasets/vcdb/data /tmp \
+RUN mv datasets/vcdb/docs /tmp && mkdir /tmp/data
 
 # Cria diretório padrão para a credencial do Kaggle
 RUN mkdir -p /root/.config/kaggle
