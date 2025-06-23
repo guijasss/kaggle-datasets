@@ -1,44 +1,61 @@
 import requests
 import os
 from datetime import datetime
-from pathlib import Path
+import zipfile
+import io
 
 # Configurações
 SOURCES = [
-    "https://raw.githubusercontent.com/example/vcdb/main/data/vcdb.csv",
-    "https://backup.example.com/vcdb.csv"
+    "https://github.com/vz-risk/VCDB/raw/master/data/csv/vcdb.csv.zip"
 ]
-OUTPUT_DIR = Path(__file__).parent.parent / "data" / "raw"
-OUTPUT_FILE = OUTPUT_DIR / "vcdb_raw.csv"
 
-def ensure_directory_exists():
-    """Garante que o diretório de saída existe"""
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+OUTPUT_DIR = "../data"
+OUTPUT_CSV = f"{OUTPUT_DIR}/vcdb.csv"
 
-def download_with_fallback():
-    """Tenta baixar de múltiplas fontes"""
+
+def download_and_extract():
+    """Tenta baixar de múltiplas fontes e extrair o CSV"""
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+
     for url in SOURCES:
         try:
             print(f"Tentando {url}...")
-            response = requests.get(url, timeout=15)
+            response = requests.get(url, timeout=30)
             response.raise_for_status()
-            
-            with open(OUTPUT_FILE, 'wb') as f:
-                f.write(response.content)
-            print(f"Download bem-sucedido! Salvo como {OUTPUT_FILE}")
+
+            print("Download bem-sucedido! Extraindo conteúdo...")
+
+            with zipfile.ZipFile(io.BytesIO(response.content)) as z:
+                # Lista os arquivos dentro do zip
+                file_names = z.namelist()
+
+                # Encontrar o primeiro arquivo CSV dentro do ZIP
+                csv_files = [f for f in file_names if f.lower().endswith(".csv")]
+
+                if not csv_files:
+                    print("Nenhum arquivo CSV encontrado no zip.")
+                    return False
+
+                csv_name = csv_files[0]
+                print(f"Extraindo {csv_name}...")
+
+                with z.open(csv_name) as f_in, open(OUTPUT_CSV, 'wb') as f_out:
+                    f_out.write(f_in.read())
+
+            print(f"Arquivo salvo em {OUTPUT_CSV}")
             return True
-            
+
         except Exception as e:
             print(f"Falha na fonte {url}: {str(e)[:100]}...")
-    
+
     return False
+
 
 if __name__ == "__main__":
     print(f"Iniciando download em {datetime.now()}")
-    ensure_directory_exists()
-    
-    if download_with_fallback():
-        print("Download concluído com sucesso!")
+
+    if download_and_extract():
+        print("Download e extração concluídos com sucesso!")
         exit(0)
     else:
         print("Todas as fontes falharam!")
